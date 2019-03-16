@@ -3,7 +3,7 @@
 
 #https://portal.pixelfederation.com/en/profile
 
-import os, sys, logging, winsound, datetime, pickle, time
+import os, sys, logging, winsound, datetime, pickle, time, random
 from selenium import webdriver
 from random import randint
 
@@ -105,40 +105,54 @@ if browser.current_url != profileURL:
 else:
     print("Already logged")
 
-if browser.current_url != profileURL:
-    logging.error('User not logged: ')
-    logging.error('An exception happened during login: ')
-    playErrorSound()
-    sys.exit()
+while True:
+    try:
+        logging.info('Opening site')
+        browser.get(profileURL)
+    except Exception as err:
+        logging.error('An exception happened during opening site: ' + str(err))
+        playErrorSound()
+    
+    if browser.current_url != profileURL:
+        logging.error('User not logged: ')
+        logging.error('An exception happened during opening site: ')
+        playErrorSound()
+        sys.exit()
+    
+    logging.info('Searching search button...')
+    searchButton = browser.find_elements_by_class_name('fa-search')[0]
+    searchButton.click()
 
-logging.info('Searching search button...')
-searchButton = browser.find_elements_by_class_name('fa-search')[0]
-searchButton.click()
-
-logging.info('Searching invite buttons')
-inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
-logging.info('Found %s buttons' %len(inviteButtons))
-while inviteButtons == []:
-    logging.info('Waiting for invite buttons')
+    logging.info('Searching invite buttons')
     inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
     logging.info('Found %s buttons' %len(inviteButtons))
-    sleepTime = randint(1.0, 4.0)
+    
+    whileIteractionBreak = 1
+    while inviteButtons == []:
+        logging.info('(%s) Waiting for invite buttons' %whileIteractionBreak)
+        whileIteractionBreak = whileIteractionBreak - 1
+        inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
+        logging.info('Found %s buttons' %len(inviteButtons))
+        sleepTime = randint(1.0, 4.0)
+        logging.info('Sleep time: %s...' %sleepTime)
+        time.sleep(sleepTime)
+        if whileIteractionBreak < 0:
+            break
+
+    random.shuffle(inviteButtons)
+    i = 1
+    for button in inviteButtons:
+        button.click()
+        sleepTime = randint(0.0, 100.0)/100
+        logging.info('(%s) Sleep time: %s...' %(i, sleepTime))
+        i = i + 1
+        time.sleep(sleepTime)
+
+    sleepTime = randint(10.0, 30.0)
     logging.info('Sleep time: %s...' %sleepTime)
     time.sleep(sleepTime)
 
-i = 1
-for button in inviteButtons:
-    button.click()
-    sleepTime = randint(0.0, 100.0)/100
-    logging.info('(%s) Sleep time: %s...' %(i, sleepTime))
-    i = i + 1
-    time.sleep(sleepTime)
-
-sleepTime = randint(4.0, 10.0)
-logging.info('Sleep time: %s...' %sleepTime)
-time.sleep(sleepTime)
-
-
+    
 #os.system("pause")
 #browser.close()
 
