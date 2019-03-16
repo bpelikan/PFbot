@@ -3,9 +3,8 @@
 
 #https://portal.pixelfederation.com/en/profile
 
-import os, sys, logging, winsound, datetime
+import os, sys, logging, winsound, datetime, pickle
 from selenium import webdriver
-
 
 ##################################################
 ##                 FUNCTIONS                    ##
@@ -65,6 +64,18 @@ quoraCookiesPath = os.path.join(filesPath, quoraCookiesFileName)
 
 logging.info('Opening browser...')
 browser = webdriver.Chrome()
+browser.get('https://www.google.pl/')
+
+#Loading cookies file
+if os.path.isfile(quoraCookiesPath) == True:
+    logging.info('Loading cookies file')
+    try:
+        for cookie in pickle.load(open(quoraCookiesPath, "rb")):
+            print(cookie)
+            browser.add_cookie(cookie)
+    except Exception as err:
+        logging.error('An exception happened during loading cookies: ' + str(err))
+        playErrorSound()
 
 try:
     logging.info('Opening site...')
@@ -80,11 +91,17 @@ if browser.current_url != profileURL:
         print('Log in and press any key...')
         os.system("pause")
 
+        #Zapisanie plikow cookie
+        logging.info('Saving cookies')
+        cookieFile = open(quoraCookiesPath, "wb")
+        pickle.dump(browser.get_cookies() , cookieFile)
+        cookieFile.close()
+
     except Exception as err:
         logging.error('An exception happened during login: ' + str(err))
         playErrorSound()
 else:
-    print("zalogowany")
+    print("już zalogowany")
 
 try:
     logging.info('Opening site...')
@@ -101,4 +118,4 @@ else:
 #os.system("pause")
 #browser.close()
 
-sys.exit()
+#sys.exit()
