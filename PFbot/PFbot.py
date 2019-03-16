@@ -47,18 +47,58 @@ if filesPath != os.getcwd():
     sys.exit()
 print('Current path: %s' %os.getcwd())
 
-profileURL = "https://portal.pixelfederation.com/en/profile"
+#account
+profileURL = 'https://portal.pixelfederation.com/en/profile'
 accountLoginFileName = 'logpf.txt'
+myUserName, myUserPass = getAccountLoginData(filesPath, accountLoginFileName)
 
+#logging
 loggingFolderName = os.path.join(filesPath, 'logs')
 os.makedirs(loggingFolderName, exist_ok=True)
 setLoggingFileName(loggingFolderName, 'PFbotLog ' + str(datetime.datetime.now().strftime('%Y-%m-%d %H%M%S')) + '.txt')
-myUserName, myUserPass = getAccountLoginData(filesPath, accountLoginFileName)
 
+#cookies
+quoraCookiesFileName = 'QuoraCookiesForUpdates.pkl'
+quoraCookiesPath = os.path.join(filesPath, quoraCookiesFileName)
 
-print("open chrome")
+#tags
+
+logging.info('Opening browser...')
 browser = webdriver.Chrome()
-print("open site")
-browser.get(profileURL)
-print("site opened")
-browser.close()
+
+try:
+    logging.info('Opening site...')
+    browser.get(profileURL)
+except Exception as err:
+    logging.error('An exception happened during login: ' + str(err))
+    playErrorSound()
+logging.info('Site opened...')
+
+if browser.current_url != profileURL:
+    logging.info('Log in...')
+    try:
+        print('Log in and press any key...')
+        os.system("pause")
+
+    except Exception as err:
+        logging.error('An exception happened during login: ' + str(err))
+        playErrorSound()
+else:
+    print("zalogowany")
+
+try:
+    logging.info('Opening site...')
+    browser.get(profileURL)
+except Exception as err:
+    logging.error('An exception happened during login: ' + str(err))
+    playErrorSound()
+
+if browser.current_url != profileURL:
+    print("niezalogowany")
+else:
+    print("zalogowany")
+
+#os.system("pause")
+#browser.close()
+
+sys.exit()
