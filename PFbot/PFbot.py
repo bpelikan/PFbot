@@ -3,8 +3,9 @@
 
 #https://portal.pixelfederation.com/en/profile
 
-import os, sys, logging, winsound, datetime, pickle
+import os, sys, logging, winsound, datetime, pickle, time
 from selenium import webdriver
+from random import randint
 
 ##################################################
 ##                 FUNCTIONS                    ##
@@ -39,6 +40,8 @@ def setLoggingFileName(path, fileName):
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
+# def randTime():
+#     return (randint(4.0, 10.0))
 
 filesPath = 'C:\\Users\\Barpel\\Documents\\PythonScripts\\PFbotAcc'
 os.chdir(filesPath)
@@ -48,8 +51,8 @@ print('Current path: %s' %os.getcwd())
 
 #account
 profileURL = 'https://portal.pixelfederation.com/en/profile'
-accountLoginFileName = 'logpf.txt'
-myUserName, myUserPass = getAccountLoginData(filesPath, accountLoginFileName)
+# accountLoginFileName = 'logpf.txt'
+# myUserName, myUserPass = getAccountLoginData(filesPath, accountLoginFileName)
 
 #logging
 loggingFolderName = os.path.join(filesPath, 'logs')
@@ -60,11 +63,10 @@ setLoggingFileName(loggingFolderName, 'PFbotLog ' + str(datetime.datetime.now().
 quoraCookiesFileName = 'QuoraCookiesForUpdates.pkl'
 quoraCookiesPath = os.path.join(filesPath, quoraCookiesFileName)
 
-#tags
-
 logging.info('Opening browser...')
 browser = webdriver.Chrome()
 browser.get('https://www.google.pl/')
+time.sleep(1)
 
 #Loading cookies file
 if os.path.isfile(quoraCookiesPath) == True:
@@ -101,19 +103,41 @@ if browser.current_url != profileURL:
         logging.error('An exception happened during login: ' + str(err))
         playErrorSound()
 else:
-    print("już zalogowany")
-
-try:
-    logging.info('Opening site...')
-    browser.get(profileURL)
-except Exception as err:
-    logging.error('An exception happened during login: ' + str(err))
-    playErrorSound()
+    print("Already logged")
 
 if browser.current_url != profileURL:
-    print("niezalogowany")
-else:
-    print("zalogowany")
+    logging.error('User not logged: ')
+    logging.error('An exception happened during login: ')
+    playErrorSound()
+    sys.exit()
+
+logging.info('Searching search button...')
+searchButton = browser.find_elements_by_class_name('fa-search')[0]
+searchButton.click()
+
+logging.info('Searching invite buttons')
+inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
+logging.info('Found %s buttons' %len(inviteButtons))
+while inviteButtons == []:
+    logging.info('Waiting for invite buttons')
+    inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
+    logging.info('Found %s buttons' %len(inviteButtons))
+    sleepTime = randint(1.0, 4.0)
+    logging.info('Sleep time: %s...' %sleepTime)
+    time.sleep(sleepTime)
+
+i = 1
+for button in inviteButtons:
+    button.click()
+    sleepTime = randint(0.0, 100.0)/100
+    logging.info('(%s) Sleep time: %s...' %(i, sleepTime))
+    i = i + 1
+    time.sleep(sleepTime)
+
+sleepTime = randint(4.0, 10.0)
+logging.info('Sleep time: %s...' %sleepTime)
+time.sleep(sleepTime)
+
 
 #os.system("pause")
 #browser.close()
