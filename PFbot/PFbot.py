@@ -3,7 +3,7 @@
 
 #https://portal.pixelfederation.com/en/profile
 
-import os, sys, logging, winsound
+import os, sys, logging, winsound, datetime
 from selenium import webdriver
 
 
@@ -29,6 +29,16 @@ def getAccountLoginData(logPath, fileName):
     finally:
         file.close()
 
+def setLoggingFileName(path, fileName):
+    logging.basicConfig(filename=os.path.join(path, fileName), level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+    logging.disable(logging.DEBUG)
+
+    #wypisywanie logow na konsole
+    root = logging.getLogger()
+    ch = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
 
 
 filesPath = 'C:\\Users\\Barpel\\Documents\\PythonScripts\\PFbotAcc'
@@ -40,6 +50,9 @@ print('Current path: %s' %os.getcwd())
 profileURL = "https://portal.pixelfederation.com/en/profile"
 accountLoginFileName = 'logpf.txt'
 
+loggingFolderName = os.path.join(filesPath, 'logs')
+os.makedirs(loggingFolderName, exist_ok=True)
+setLoggingFileName(loggingFolderName, 'PFbotLog ' + str(datetime.datetime.now().strftime('%Y-%m-%d %H%M%S')) + '.txt')
 myUserName, myUserPass = getAccountLoginData(filesPath, accountLoginFileName)
 
 
