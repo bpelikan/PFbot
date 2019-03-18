@@ -12,6 +12,8 @@ from random import randint
 ##################################################
 def playErrorSound():
     winsound.PlaySound('C:\\Windows\\media\\Windows Exclamation.wav', winsound.SND_FILENAME)
+def playFinishSound():
+    winsound.PlaySound('C:\\Windows\\media\\Windows Logon.wav', winsound.SND_FILENAME)
 
 def getAccountLoginData(logPath, fileName):
     try:
@@ -105,7 +107,14 @@ if browser.current_url != profileURL:
 else:
     print("Already logged")
 
+invitationCount = 0
 while True:
+    if invitationCount > 1000:
+        playFinishSound()
+        logging.info('--------- BREAK invitationCount: (%s)' %invitationCount)
+        break
+
+    logging.info('--------- InvitationCount: %s ---------' %invitationCount)
     try:
         logging.info('Opening site')
         browser.get(profileURL)
@@ -127,31 +136,33 @@ while True:
     inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
     logging.info('Found %s buttons' %len(inviteButtons))
     
-    whileIteractionBreak = 1
+    whileIteractionBreak = 18
     while inviteButtons == []:
-        logging.info('(%s) Waiting for invite buttons' %whileIteractionBreak)
-        whileIteractionBreak = whileIteractionBreak - 1
+        logging.info('Waiting for invite buttons - (%s)' %whileIteractionBreak)
         inviteButtons = browser.find_elements_by_class_name('player-list__item__button')
         logging.info('Found %s buttons' %len(inviteButtons))
-        sleepTime = randint(1.0, 4.0)
-        logging.info('Sleep time: %s...' %sleepTime)
-        time.sleep(sleepTime)
+        whileIteractionBreak = whileIteractionBreak - 1
         if whileIteractionBreak < 0:
+            logging.info('--------- BREAK whileIteractionBreak: (%s)' %whileIteractionBreak)
             break
+        if inviteButtons == []:
+            sleepTime = 4 #randint(1.0, 4.0)
+            logging.info('Sleep time: %s...' %sleepTime)
+            time.sleep(sleepTime)
 
     random.shuffle(inviteButtons)
     i = 1
     for button in inviteButtons:
         button.click()
-        sleepTime = randint(0.0, 100.0)/100
-        logging.info('(%s) Sleep time: %s...' %(i, sleepTime))
+        invitationCount = invitationCount + 1
+        sleepTime = randint(10.0, 50.0)/100
+        logging.info('Invitation (%s) click sleep time: %s' %(i, sleepTime))
         i = i + 1
         time.sleep(sleepTime)
 
-    sleepTime = randint(10.0, 30.0)
+    sleepTime = randint(1.0, 9.0)
     logging.info('Sleep time: %s...' %sleepTime)
     time.sleep(sleepTime)
-
     
 #os.system("pause")
 #browser.close()
